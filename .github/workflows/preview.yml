@@ -1,0 +1,29 @@
+name: Normandy official watercolor stills
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  previews:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Traditional Chinese fonts
+        run: sudo apt-get update -q && sudo apt-get install -y -q fonts-noto-cjk
+      - name: Capture two stills only
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          mkdir -p previews
+          node capture.mjs --url index.html --frames '75,225' --out previews --status previews/status.json
+          node capture.mjs --url index.html --verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: normandy-watercolor-previews-v2
+          path: previews/
+          retention-days: 7
