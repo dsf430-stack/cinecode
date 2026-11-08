@@ -19,7 +19,7 @@ function man(c,x,y,s,t=0){c.save();c.translate(x,y);c.scale(s,s);
  brush(c,-5,28,-11-stride,57,10,olive,.85,-2);brush(c,-11-stride,57,-19-stride,80,8,navy,.8,1);
  brush(c,5,28,14+stride,53,10,olive,.8,2);brush(c,14+stride,53,13+stride,80,8,navy,.8,-2);
  brush(c,-20-stride,81,-9-stride,82,6,'#555244',.85);brush(c,11+stride,81,24+stride,80,6,'#555244',.85);
- brush(c,0,-5,0,34,28,olive,.7,-1);brush(c,7,-2,7,32,10,navy,.4);
+ brush(c,1,-15,1,1,7,'#bca27d',.85);brush(c,0,-5,0,34,28,olive,.7,-1);brush(c,7,-2,7,32,10,navy,.4);
  brush(c,-14,-2,-15,26,14,'#656c50',.8,-3);brush(c,-20,-1,-21,26,9,'#8c8d69',.9);
  brush(c,-7,-4,-6,27,2.8,'#d2c098',.9);brush(c,6,-4,4,28,2.4,'#c5b78c',.9);
  brush(c,-12,26,11,27,4,'#a69269',.9);brush(c,-10,25,-9,33,5,'#b5a078',.8);
