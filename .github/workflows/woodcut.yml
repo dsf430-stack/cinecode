@@ -39,14 +39,14 @@ jobs:
       - name: Mix and master
         run: |
           python tools/mix.py audio/mix.json
-          python tools/master_audio.py audio/mix.wav deliver/Donkey_Gold_Cart_Woodcut_068.mp4 --video audio/picture.mp4 --limit | tee deliver/master.log
+          python tools/master_audio.py audio/mix.wav deliver/Donkey_Gold_Cart_Woodcut_Natural_068.mp4 --video audio/picture.mp4 --limit | tee deliver/master.log
       - name: Verify complete MP4
         run: |
           python produce.py verify
-          ffmpeg -v error -i deliver/Donkey_Gold_Cart_Woodcut_068.mp4 -vf 'fps=1/4,scale=180:320,tile=4x3' -frames:v 1 deliver/sheet.jpg
+          ffmpeg -v error -i deliver/Donkey_Gold_Cart_Woodcut_Natural_068.mp4 -vf 'fps=1/4,scale=180:320,tile=4x3' -frames:v 1 deliver/sheet.jpg
       - uses: actions/upload-artifact@v4
         with:
-          name: donkey-woodcut-film
+          name: donkey-woodcut-natural
           path: deliver/
           if-no-files-found: error
           retention-days: 14

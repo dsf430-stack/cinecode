@@ -21,7 +21,7 @@ SCRIPT = [
     (7, "腦子活絡的才能越走越寬。"),
 ]
 FPS = 30
-FILENAME = "Donkey_Gold_Cart_Woodcut_068"
+FILENAME = "Donkey_Gold_Cart_Woodcut_Natural_068"
 
 
 def probe(file):
@@ -42,35 +42,58 @@ async def prepare():
     raw.mkdir(parents=True, exist_ok=True)
     deliver = Path("deliver")
     deliver.mkdir(exist_ok=True)
-    slots = asyncio.Semaphore(3)
+    narration = "".join(text for _, text in SCRIPT)
+    audio_file = raw / "narration.mp3"
+    speaker = edge_tts.Communicate(
+        narration, "zh-TW-HsiaoChenNeural", rate="+0%", pitch="+5Hz",
+        boundary="WordBoundary", connect_timeout=15, receive_timeout=30
+    )
+    marks = []
+    def written(text):
+        return "".join(c for c in text if c.isalnum())
 
-    async def speak(i, text):
-        path = raw / f"line-{i:02d}.mp3"
-        async with slots:
-            tts = edge_tts.Communicate(text, "zh-TW-HsiaoChenNeural", rate="+20%", pitch="+5Hz",
-                                       connect_timeout=15, receive_timeout=30)
-            await asyncio.wait_for(tts.save(str(path)), timeout=50)
-        return str(path)
+    async def collect():
+        with audio_file.open("wb") as audio:
+            async for chunk in speaker.stream():
+                if chunk["type"] == "audio":
+                    audio.write(chunk["data"])
+                elif chunk["type"] == "WordBoundary":
+                    word = written(chunk["text"])
+                    if word:
+                        marks.append((word, chunk["offset"] / 1e7,
+                                      (chunk["offset"] + chunk["duration"]) / 1e7))
 
-    paths = await asyncio.gather(*(speak(i, text) for i, (_, text) in enumerate(SCRIPT)))
+    await asyncio.wait_for(collect(), timeout=80)
+    if "".join(word for word, _, _ in marks) != written(narration):
+        raise ValueError("Speech boundary text does not cover the narration exactly")
     subprocess.run([
-        sys.executable, "tools/voice_treat.py", "apply", *paths,
+        sys.executable, "tools/voice_treat.py", "apply", str(audio_file),
         "--medium", "clean", "--space", "dry", "--target", "-16", "--out", "audio/vo"
     ], check=True)
-    cues = []
-    layers = [{"file": "audio/score.wav", "at": 0, "gain_db": 2, "bus": "music"}]
-    cursor = 0
-    for i, (scene, text) in enumerate(SCRIPT):
-        wav = Path(f"audio/vo/line-{i:02d}.wav")
-        duration = float(probe(wav)["format"]["duration"])
-        start = cursor + (.28 if not i else 0)
-        end = start + duration
-        scene_start = cursor if not i or cues[-1]["scene"] != scene else cues[-1]["sceneStart"]
-        cues.append({"scene": scene, "sceneStart": scene_start,
-                     "start": round(start, 4), "end": round(end, 4), "text": text})
-        layers.append({"file": str(wav), "at": start, "bus": "dialogue"})
-        cursor = math.ceil((end + .16) * FPS) / FPS
-    frames = math.ceil((cursor + .38) * FPS)
+    voice = Path("audio/vo/narration.wav")
+    voice_duration = float(probe(voice)["format"]["duration"])
+    lead = .25
+    layers = [
+        {"file": "audio/score.wav", "at": 0, "gain_db": 1, "bus": "music"},
+        {"file": str(voice), "at": lead, "bus": "dialogue"},
+    ]
+    # Expand each timed token over its covered characters. Subtitle cuts are
+    # selected from the service boundaries, without splitting the speech audio.
+    character_marks = [ (begin, end) for word, begin, end in marks for _ in word ]
+    cues, position = [], 0
+    for scene, caption in SCRIPT:
+        count = len(written(caption))
+        start = lead + character_marks[position][0]
+        end = lead + character_marks[position + count - 1][1]
+        position += count
+        scene_start = start if not cues or cues[-1]["scene"] != scene else cues[-1]["sceneStart"]
+        cues.append({"scene": scene, "sceneStart": scene_start, "start": round(start, 4),
+                     "end": round(end, 4), "text": caption})
+    for cue, next_cue in zip(cues, cues[1:]):
+        cue["end"] = min(cue["end"], next_cue["start"])
+    if cues[-1]["end"] > lead + voice_duration + .20:
+        raise ValueError("Final speech boundary is outside the audio")
+    frames = math.ceil((lead + voice_duration + .38) * FPS)
     timeline = {"frames": frames, "cues": cues}
     Path("timing.js").write_text("window.TIMING=" + json.dumps(timeline, ensure_ascii=False) + ";\n")
     (deliver / f"{FILENAME}.srt").write_text("\n\n".join(

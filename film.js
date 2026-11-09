@@ -12,15 +12,22 @@ function stroke(g,d,w=2,ink='#fff'){
 function ellipse(g,x,y,rx,ry,ink='#000'){
  g.beginPath();g.ellipse(x,y,rx,ry,0,0,Math.PI*2);g.fillStyle=ink;g.fill();
 }
-function carved(g,d,{gap=7,angle=.3,width=1.5,light=1,seed=19}={}){
- p(g,d);
+function carved(g,d,{gap=7,angle=.3,width=1.5,light=1,seed=19,paper=false}={}){
+ p(g,d,paper?'#fff':'#000');
  g.save();g.clip(new Path2D(d));g.translate(270,475);g.rotate(angle);g.translate(-270,-475);
  const random=mulberry(seed);
  for(let y=-250;y<1250;y+=gap){
   const x=-450+random()*8, wave=random()*14;
-  stroke(g,`M${x} ${y} Q100 ${y+wave} 550 ${y-7} T1000 ${y+3}`,width*(.4+random()*.9)*light);
+  stroke(g,`M${x} ${y} Q100 ${y+wave} 550 ${y-7} T1000 ${y+3}`,width*(.4+random()*.9)*light,paper?'#1e1e1e':'#fff');
  }
  g.restore();
+}
+function tint(g,path,opacity){
+ colour.save();
+ colour.setTransform(g.getTransform());
+ colour.globalAlpha=opacity;
+ p(colour,path);
+ colour.restore();
 }
 function move(g,x,y,s,fn){g.save();g.translate(x,y);g.scale(s,s);fn();g.restore();}
 function sky(g,variant){
@@ -32,10 +39,11 @@ function sky(g,variant){
 }
 const hills='M15 569 Q60 539 112 551 Q158 487 211 550 Q270 509 303 540 Q348 509 379 567 Q471 517 525 575 L525 818 L15 818Z';
 function terrain(g){
- carved(g,hills,{gap:8,angle:-.13,width:1.8});
+ carved(g,hills,{gap:10,angle:-.13,width:1.35,paper:true});
+ tint(g,hills,.24);
  for(let i=0;i<18;i++){
   const y=590+i*13;
-  stroke(g,`M20 ${y} Q212 ${y-64} 520 ${y-17}`,1.7);
+  stroke(g,`M20 ${y} Q212 ${y-64} 520 ${y-17}`,1.2,'#111');
  }
 }
 function human(g,x,y,s,t,bag=false){
@@ -43,9 +51,10 @@ function human(g,x,y,s,t,bag=false){
   const a=Math.sin(t*10)*22,b=-a;
   stroke(g,`M-8 58 Q${a-8} 77 ${a-15} 99 M9 58 Q${b+8} 79 ${b+15} 99`,12,'#000');
   stroke(g,`M${a-19} 99 h13 M${b+11} 99 h14`,6,'#000');
-  carved(g,'M-15 18 Q-21 35 -17 61 Q0 68 17 61 L19 31 Q17 18 5 18Z',{gap:7,angle:-.3,width:1,seed:7});
-  p(g,'M-12 3 Q-12-14 4-13 Q16-11 14 1 L20 5 L14 8 Q12 19 2 18 Q-10 16-12 3Z');
-  stroke(g,'M6 1 l5 1 M7 11 l4 -1',1.1);
+  carved(g,'M-15 18 Q-21 35 -17 61 Q0 68 17 61 L19 31 Q17 18 5 18Z',{gap:7,angle:-.3,width:1.35,seed:7,paper:true});
+  const face='M-12 3 Q-12-14 4-13 Q16-11 14 1 L20 5 L14 8 Q12 19 2 18 Q-10 16-12 3Z';
+  p(g,face,'#fff');stroke(g,face,1.7,'#000');
+  stroke(g,'M6 1 l5 1 M7 11 l4 -1',1.1,'#000');
   p(g,'M-18-9 Q-13-22 7-18 Q17-16 20-7 L22-4 L-20-4Z');
   stroke(g,'M-13-9 Q0-13 14-9',1.2);
   stroke(g,`M-14 27 Q-24 41 ${-30+a*.4} 51 M15 26 Q28 40 ${32+b*.3} 34`,8,'#000');
@@ -55,11 +64,13 @@ function human(g,x,y,s,t,bag=false){
 function temple(g,t){
  const open=.15+.85*Math.sin(Math.min(t/4.6,1)*Math.PI)**2,cx=271;
  terrain(g);
- carved(g,'M54 361 Q110 340 145 291 Q266 311 393 291 Q421 342 487 361 Q397 379 309 365 L217 365 Q131 379 54 361Z',{gap:5,angle:-.12,width:1.25});
+ const roof='M54 361 Q110 340 145 291 Q266 311 393 291 Q421 342 487 361 Q397 379 309 365 L217 365 Q131 379 54 361Z';
+ carved(g,roof,{gap:6,angle:-.12,width:1.6,paper:true});
+ tint(g,roof,.8);stroke(g,roof,3,'#000');
  carved(g,'M96 394 Q150 377 183 345 L364 346 Q404 378 449 394 L437 407 L109 407Z',{gap:6,angle:.15,width:1.6});
  p(g,'M118 407 H425 V629 H118Z');
  p(g,'M147 424 H395 V615 H147Z','#fff');
- carved(g,'M148 428 H396 V622 H148Z',{gap:12,angle:1.52,width:1.4});
+ carved(g,'M148 428 H396 V622 H148Z',{gap:12,angle:1.52,width:1.8,paper:true});
  p(g,`M${cx-open*26} 423 h${open*52} v200 h${-open*52}Z`,'#fff');
  for(let i=0;i<6;i++){
   const y=632+i*9;
@@ -79,7 +90,7 @@ function donkey(g,x,y,s,t,look){
   stroke(g,`M-60-33 L${-52+a*.5} 6 L${-67+a} 42 M-34-24 L${-35-a*.5} 12 L${-36-a} 42 M34-39 L${31+a*.5} 8 L${24+a} 42 M50-31 L${56-a*.5} 11 L${62-a} 42`,12,'#000');
   for(const z of [-67+a,-36-a,24+a,62-a])stroke(g,`M${z-6} 43 h13`,7,'#000');
   stroke(g,`M-74-59 Q-101-56 -112 ${-29+Math.sin(t*8)*12}`,5,'#000');
-  carved(g,donkeyBody,{gap:6.8,angle:-.33,width:1.45});
+  carved(g,donkeyBody,{gap:4.6,angle:-.33,width:2.3});
   stroke(g,'M-58-59 Q-19-73 26-61 M-67-38 Q-53-21-21-23 M11-28 Q38-32 48-51',1.55);
   g.save();g.translate(53,-60);g.rotate(look*.55);
   carved(g,'M-18 22 Q-13-9 4-48 Q14-59 25-53 L34-25 Q44-21 55-12 Q67 5 52 14 Q32 18 14 5 L10 33Z',{gap:6,angle:.65,width:1.5});
@@ -129,19 +140,19 @@ function cartScene(g,c,t,mode){
  wheel(g,x-191,base-9,38,t);
  wheel(g,x-119,base-8,33,t);
  donkey(g,x,base,.98,mode? t*(1-slow*.78):t,mode?slow:0);
- if(mode)bowl(g,423,655);
+ if(mode){ellipse(g,425,674,52,25,'#fff');bowl(g,425,641);}
 }
 function rice(g,x,y,t,seed){
  const r=mulberry(seed),bend=Math.sin(t*2+seed)*7,h=25+r()*42;
- stroke(g,`M${x} ${y} q${bend} ${-h*.58} ${bend-12} ${-h}`,1.7,'#fff');
+ stroke(g,`M${x} ${y} q${bend} ${-h*.58} ${bend-12} ${-h}`,1.7,'#232323');
  for(let j=0;j<5;j++){
   const y2=y-h+j*4,x2=x+bend-12+j*2;
-  stroke(g,`M${x2} ${y2} l-6 -4 m6 4 l5 -6`,1.25);
+  stroke(g,`M${x2} ${y2} l-6 -4 m6 4 l5 -6`,1.25,'#232323');
  }
 }
 function field(g,t,sign){
  terrain(g);
- for(let j=0;j<5;j++)for(let i=0;i<18;i++)rice(g,35+i*27+(j%2)*9,620+j*43,t,98+i*7+j*100);
+ for(let j=0;j<4;j++)for(let i=0;i<13;i++)rice(g,30+i*38+(j%2)*9,602+j*52,t,98+i*7+j*100);
  human(g,104,522,1.38,t*.75,true);
  if(sign){
   for(let i=0;i<5;i++){
@@ -187,7 +198,9 @@ function horseScene(g,t){
 }
 function paths(g,t){
  const u=ss(t*.5);
- carved(g,'M14 676 Q118 596 204 602 Q277 542 370 610 Q440 588 526 657 V810 H14Z',{gap:7,angle:-.15,width:2.2});
+ const ground='M14 676 Q118 596 204 602 Q277 542 370 610 Q440 588 526 657 V810 H14Z';
+ carved(g,ground,{gap:6.5,angle:-.15,width:1.55,paper:true});
+ tint(g,ground,.49);
  const roads=[
   'M239 811 Q262 672 231 616 Q158 544 60 518 L42 534 Q157 572 199 635 Q209 688 172 813Z',
   'M216 811 Q258 660 273 607 Q301 543 358 485 L372 498 Q319 554 300 614 Q279 686 282 811Z',
@@ -195,6 +208,11 @@ function paths(g,t){
  ];
  g.save();g.beginPath();g.rect(15,819-353*u,510,354*u);g.clip();
  for(const road of roads)p(g,road,'#fff');
+ colour.save();colour.setTransform(g.getTransform());
+ colour.beginPath();colour.rect(15,819-353*u,510,354*u);colour.clip();
+ colour.globalCompositeOperation='destination-out';
+ for(const road of roads)p(colour,road);
+ colour.restore();
  g.restore();
  const wall=1-ss(t*.75);
  if(wall>.02){
@@ -225,12 +243,13 @@ function page(frame){
  }
  scenes[cue.scene](m,Math.max(0,timed));
  m.restore();
- const sheet=printer.render(mask,plate,{mode:'print',seed:63,inkSeed:12,plate:'#af782c',ink:'#211d18',paper:'#f2e8d5',edge:.9,reg:[1.3,-.5]});
+ const inks=['#9a4f40','#ae7629','#ae7629','#52714f','#52714f','#ae7629','#557088','#557088'];
+ const sheet=printer.render(mask,plate,{mode:'print',seed:63,inkSeed:12,plate:inks[cue.scene],ink:'#2b2521',paper:'#f6edda',edge:.9,reg:[1.3,-.5]});
  out.save();out.scale(2,2);out.drawImage(sheet,0,0);
  out.textAlign='left';out.fillStyle='#241f18';out.font='14px "Noto Serif CJK TC"';out.fillText('木刻寓言',31,47);
  out.font='39px "Noto Serif CJK TC"';out.fillText('驢拉金車',29,112);
  stroke(out,'M29 129 H511',1,'#51483b');
- out.font='22px "Noto Serif CJK TC"';out.textAlign='center';
+ out.font='25px "Noto Serif CJK TC"';out.textAlign='center';
  if(time>=cue.start&&time<cue.end+.12)out.fillText(cue.text,270,872,478);
  out.font='12px "Noto Serif CJK TC"';out.fillText(`第 ${String(cue.scene+1).padStart(2,'0')} 幕`,270,928);
  out.restore();
