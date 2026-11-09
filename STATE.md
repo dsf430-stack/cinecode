@@ -1,15 +1,9 @@
-# Normandy watercolor preview v2
-
-Phase: TWO_STILLS_ONLY_AWAITING_APPROVAL. No MP4 and no narration generated.
-User requested an implementation based on Cinecode's own design after rejecting simplified vector previews.
-Selected official recipe: styles/watercolor.md (Watercolor Brush).
-Use the exact unmodified engine.js from LemoLab commit d33bdea74eeecde3922b0fbad227f0d3dc7afe75, cited by Cinecode, under MIT (LICENSE-LemoLab).
-Implementation: mk/drawS variable-width ribbons, 7 bristle tracks, partial pigment opacity, seeded rendering, three-pass jittered washes, procedural fibrous paper, no closed vector outlines, paper caption margin.
-New scene.js is authored for Normandy; it does not copy the demo's plants, characters, layout or story. Two stills at frame 75 and 225 are preview designs only. Full animation, acting, sound and voice remain to be implemented after approval. Do not present this as a finished film.
-Target after approval: 15 s, 9:16, Traditional Chinese narration/subtitles, music and SFX, MP4 via GitHub Actions. Do not modify other repositories.
-
-Sources:
-- Cinecode styles/watercolor.md and its linked DEMO.md.
-- https://www.nationalarchives.gov.uk/education/resources/archives-live-d-day/
-
-History: previous simplified previews rejected. This preview supersedes their artwork only; topic and script remain provisional until user approval.
+# 諾曼第登陸｜Watercolor Brush
+- Phase: authorized production render.
+- Preview: Actions 42498863857. Proceeding on user instruction to make the film using the official method.
+- Renderer: upstream Watercolor Brush engine (unmodified), authored Normandy choreography and original procedural score/foley. Official Cinecode capture, voice treatment, mixing, mastering and QC tools.
+- Voice: existing Taiwan Mandarin 068 / zh-TW-HsiaoChenNeural, +20%, +5Hz. Narration generated with Edge TTS and timed from the processed speech WAVs. Traditional Chinese burn-in captions and SRT.
+- Target: 15 seconds, 1080×1920, 30 fps, H.264/AAC.
+- Scenes: 00–04 approach, 04–08 ramp and first waders, 08–12 beach advance, 12–15 reinforcements.
+- Source: https://www.nationalarchives.gov.uk/education/resources/archives-live-d-day/
+- Continue: check Normandy watercolor film workflow, download artifact, verify QC and save MP4. Preview workflow remains separate.

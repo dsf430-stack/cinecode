@@ -1,0 +1,51 @@
+name: Normandy watercolor film
+on:
+  push:
+    branches: [preview/normandy-watercolor-v2]
+    paths: ['.github/workflows/film.yml', 'film.html', 'film-scene.js', 'sound.js', 'produce.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  film:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+      CINECODE_FRAME_TIMEOUT: '45'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install render and voice dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-noto-cjk ffmpeg
+          python -m pip install --disable-pip-version-check edge-tts==7.2.8
+      - name: Generate 068 narration and time captions
+        run: python produce.py prepare
+      - name: Render with Cinecode
+        run: |
+          node tools/capture.mjs --url film.html --verify --params 'w=1080&h=1920'
+          node tools/capture.mjs --url film.html --params 'w=1080&h=1920' --video audio/picture.mp4 --audio audio/score.wav --format jpeg --quality 0.95 --maxrate 10M --status deliver/render.json
+      - name: Mix and master with Cinecode
+        run: |
+          python tools/mix.py audio/mix.json
+          python tools/master_audio.py audio/mix.wav deliver/Normandy_Watercolor_068.mp4 --video audio/picture.mp4 --limit | tee deliver/master.log
+      - name: Decode and check delivery
+        env:
+          QC_OUT: deliver/qc
+        run: |
+          python produce.py verify
+          python tools/qc.py all deliver/Normandy_Watercolor_068.mp4 0,4,8,12,15
+      - name: Upload final film
+        uses: actions/upload-artifact@v4
+        with:
+          name: normandy-watercolor-068
+          path: deliver/
+          if-no-files-found: error
+          retention-days: 14
