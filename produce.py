@@ -45,7 +45,7 @@ async def prepare():
     narration = "".join(text for _, text in SCRIPT)
     audio_file = raw / "narration.mp3"
     speaker = edge_tts.Communicate(
-        narration, "zh-TW-HsiaoChenNeural", rate="+0%", pitch="+5Hz",
+        narration, "zh-TW-HsiaoChenNeural", rate="-10%", pitch="+5Hz",
         boundary="WordBoundary", connect_timeout=15, receive_timeout=30
     )
     marks = []

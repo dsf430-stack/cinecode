@@ -232,9 +232,12 @@ function page(frame){
  const elapsed=time-cue.sceneStart;
  m.fillStyle='#fff';m.fillRect(0,0,W,H);colour.clearRect(0,0,W,H);
  m.save();
- m.beginPath();m.moveTo(17,artT);
- for(let x=20;x<=524;x+=7)m.lineTo(x,artT+Math.sin(x*3.8)*2.4);
- m.lineTo(523,artB-5);m.lineTo(16,artB);m.closePath();m.clip();
+ const border=new Path2D();
+ border.moveTo(17,artT);
+ for(let x=20;x<=524;x+=7)border.lineTo(x,artT+Math.sin(x*3.8)*2.4);
+ border.lineTo(523,artB-5);border.lineTo(16,artB);border.closePath();
+ m.clip(border);
+ colour.save();colour.clip(border);
  sky(m,cue.scene);
  const timed=Math.floor(elapsed*15)/15;
  if(cue.scene===0||cue.scene===7){
@@ -242,7 +245,7 @@ function page(frame){
   m.translate(270,520);m.scale(zoom,zoom);m.translate(-270,-520);
  }
  scenes[cue.scene](m,Math.max(0,timed));
- m.restore();
+ m.restore();colour.restore();
  const inks=['#9a4f40','#ae7629','#ae7629','#52714f','#52714f','#ae7629','#557088','#557088'];
  const sheet=printer.render(mask,plate,{mode:'print',seed:63,inkSeed:12,plate:inks[cue.scene],ink:'#2b2521',paper:'#f6edda',edge:.9,reg:[1.3,-.5]});
  out.save();out.scale(2,2);out.drawImage(sheet,0,0);
