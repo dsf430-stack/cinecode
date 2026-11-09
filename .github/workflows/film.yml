@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q fonts-noto-cjk ffmpeg
-          python -m pip install --disable-pip-version-check edge-tts==7.2.8
+          python -m pip install --disable-pip-version-check edge-tts==7.3.1
       - name: Generate 068 narration and time captions
         run: python produce.py prepare
       - name: Render with Cinecode
