@@ -1,0 +1,52 @@
+name: Woodcut fable
+on:
+  push:
+    branches: [production/woodcut-fable]
+    paths: ['.github/workflows/woodcut.yml', 'film.js', 'produce.py', 'film.html']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  film:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+      CINECODE_FRAME_TIMEOUT: '45'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ffmpeg fonts-noto-cjk
+          python -m pip install --disable-pip-version-check edge-tts==7.3.1
+      - name: Synthesize 068 and align captions
+        run: python produce.py prepare
+      - name: Render Woodcut Print
+        run: |
+          python -m http.server 8765 --bind 127.0.0.1 > /tmp/fable-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          curl -fsS --retry 5 --retry-connrefused http://127.0.0.1:8765/film.html -o /dev/null
+          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --verify --flags '--use-angle=swiftshader --enable-unsafe-swiftshader'
+          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --flags '--use-angle=swiftshader --enable-unsafe-swiftshader' --video audio/picture.mp4 --audio audio/score.wav --workers 2 --format jpeg --quality .91 --maxrate 10M --status deliver/render.json
+      - name: Mix and master
+        run: |
+          python tools/mix.py audio/mix.json
+          python tools/master_audio.py audio/mix.wav deliver/Donkey_Gold_Cart_Woodcut_068.mp4 --video audio/picture.mp4 --limit | tee deliver/master.log
+      - name: Verify complete MP4
+        run: |
+          python produce.py verify
+          ffmpeg -v error -i deliver/Donkey_Gold_Cart_Woodcut_068.mp4 -vf 'fps=1/4,scale=180:320,tile=4x3' -frames:v 1 deliver/sheet.jpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: donkey-woodcut-film
+          path: deliver/
+          if-no-files-found: error
+          retention-days: 14
