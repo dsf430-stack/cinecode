@@ -53,21 +53,21 @@ function human(g,x,y,s,t,bag=false){
  });
 }
 function temple(g,t){
- const open=ss(t*.8),cx=271;
+ const open=.15+.85*Math.sin(Math.min(t/4.6,1)*Math.PI)**2,cx=271;
  terrain(g);
  carved(g,'M54 361 Q110 340 145 291 Q266 311 393 291 Q421 342 487 361 Q397 379 309 365 L217 365 Q131 379 54 361Z',{gap:5,angle:-.12,width:1.25});
  carved(g,'M96 394 Q150 377 183 345 L364 346 Q404 378 449 394 L437 407 L109 407Z',{gap:6,angle:.15,width:1.6});
  p(g,'M118 407 H425 V629 H118Z');
  p(g,'M147 424 H395 V615 H147Z','#fff');
  carved(g,'M148 428 H396 V622 H148Z',{gap:12,angle:1.52,width:1.4});
- p(g,`M${cx-open*9} 423 h${open*18} v200 h${-open*18}Z`,'#fff');
+ p(g,`M${cx-open*26} 423 h${open*52} v200 h${-open*52}Z`,'#fff');
  for(let i=0;i<6;i++){
   const y=632+i*9;
   p(g,`M${108-i*7} ${y} H${435+i*8} v6 H${108-i*7}Z`,'#fff');
  }
  for(let i=0;i<8;i++){
   const z=i/7;
-  human(g,264+Math.sin(i*1.2)*17+z*144-open*10,565+z*133,.45+.56*z,t+i*.4);
+  human(g,279+Math.sin(i*1.2)*17+z*156-t*(6+8*z),555+z*146+Math.sin(t*6+i)*7,.62+.72*z,t+i*.4);
  }
  const line=WC.cutAlong([[77,369],[178,372],[263,362],[367,373],[470,368]],{w:3,seg:[18,35],gap:[3,8],kind:'v',reveal:{t0:0,t1:1.1,speed:550}});
  WC.drawStrokes(g,line,{t});
@@ -203,7 +203,7 @@ function paths(g,t){
   for(let i=0;i<5;i++)stroke(g,`M36 ${571+i*23} L505 ${542+i*23}`,1.1);
   g.restore();
  }
- human(g,247+u*31,692-u*145,1.08-u*.37,t,true);
+ human(g,176+Math.min(t,5.2)*32,696-Math.min(t,5.2)*24,1.7-Math.min(t,5.2)*.18,t,true);
 }
 const scenes=[temple,(g,t)=>cartScene(g,colour,t,false),(g,t)=>cartScene(g,colour,t,true),
  (g,t)=>field(g,t,false),(g,t)=>field(g,t,true),(g,t)=>scaleScene(g,colour,t),horseScene,paths];
@@ -219,6 +219,10 @@ function page(frame){
  m.lineTo(523,artB-5);m.lineTo(16,artB);m.closePath();m.clip();
  sky(m,cue.scene);
  const timed=Math.floor(elapsed*15)/15;
+ if(cue.scene===0||cue.scene===7){
+  const zoom=1+elapsed*.045;
+  m.translate(270,520);m.scale(zoom,zoom);m.translate(-270,-520);
+ }
  scenes[cue.scene](m,Math.max(0,timed));
  m.restore();
  const sheet=printer.render(mask,plate,{mode:'print',seed:63,inkSeed:12,plate:'#af782c',ink:'#211d18',paper:'#f2e8d5',edge:.9,reg:[1.3,-.5]});
