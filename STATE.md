@@ -1,9 +1,13 @@
 # 諾曼第登陸｜Watercolor Brush
-- Phase: authorized production render.
+- Phase: DONE. Final MP4 rendered, verified and saved.
 - Preview: Actions 42498863857. Proceeding on user instruction to make the film using the official method.
 - Renderer: upstream Watercolor Brush engine (unmodified), authored Normandy choreography and original procedural score/foley. Official Cinecode capture, voice treatment, mixing, mastering and QC tools.
 - Voice: existing Taiwan Mandarin 068 / zh-TW-HsiaoChenNeural, +20%, +5Hz. Narration generated with Edge TTS and timed from the processed speech WAVs. Traditional Chinese burn-in captions and SRT.
 - Target: 15 seconds, 1080×1920, 30 fps, H.264/AAC.
 - Scenes: 00–04 approach, 04–08 ramp and first waders, 08–12 beach advance, 12–15 reinforcements.
 - Source: https://www.nationalarchives.gov.uk/education/resources/archives-live-d-day/
-- Continue: check Normandy watercolor film workflow, download artifact, verify QC and save MP4. Preview workflow remains separate.
+- Final run: https://github.com/dsf430-stack/cinecode/actions/runs/42539591186
+- Tested commit: `6e2c31b0e37507d4d939bea1a1a89cb7024c608c`.
+- Final: 15.000 s, 1080×1920, 30 fps, 450 frames, H.264/AAC stereo. Full decode passed. No black intervals, frozen intervals, exact consecutive duplicates or composition repeats. All four motion and per-scene sound checks passed. Master measured −14.0 LUFS.
+- Root cause of initial failure: Edge TTS 7.2.8 handshake HTTP 403. Fix: upstream 7.3.1 with current handshake support, same 068 voice. First render was refined to separate shot compositions and reduce third-line harshness. Recheck using the final run above.
+- Final MP4: Normandy_Watercolor_068.mp4, saved Library ID `libfile_46db6bce3ca48191bdb3edca28157a1d`. SRT and QC evidence in the Actions artifact.
