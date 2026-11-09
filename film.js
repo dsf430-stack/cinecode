@@ -208,6 +208,7 @@ function paths(g,t){
 const scenes=[temple,(g,t)=>cartScene(g,colour,t,false),(g,t)=>cartScene(g,colour,t,true),
  (g,t)=>field(g,t,false),(g,t)=>field(g,t,true),(g,t)=>scaleScene(g,colour,t),horseScene,paths];
 function page(frame){
+ m.reset();colour.reset();out.reset();
  const time=frame/FPS;
  const cue=cuts.cues.findLast(c=>time>=c.start)??cuts.cues[0];
  const elapsed=time-cue.sceneStart;

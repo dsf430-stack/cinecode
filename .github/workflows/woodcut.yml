@@ -34,8 +34,8 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           curl -fsS --retry 5 --retry-connrefused http://127.0.0.1:8765/film.html -o /dev/null
-          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --verify --flags '--use-angle=swiftshader --enable-unsafe-swiftshader'
-          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --flags '--use-angle=swiftshader --enable-unsafe-swiftshader' --video audio/picture.mp4 --audio audio/score.wav --workers 2 --format jpeg --quality .91 --maxrate 10M --status deliver/render.json
+          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --verify --flags '--use-angle=swiftshader --enable-unsafe-swiftshader --disable-accelerated-2d-canvas'
+          node tools/capture.mjs --url http://127.0.0.1:8765/film.html --flags '--use-angle=swiftshader --enable-unsafe-swiftshader --disable-accelerated-2d-canvas' --video audio/picture.mp4 --audio audio/score.wav --workers 2 --format jpeg --quality .91 --maxrate 10M --status deliver/render.json
       - name: Mix and master
         run: |
           python tools/mix.py audio/mix.json
