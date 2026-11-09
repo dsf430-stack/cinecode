@@ -44,7 +44,14 @@ async def prepare():
         sys.executable, "tools/voice_treat.py", "apply", *paths,
         "--medium", "clean", "--space", "dry", "--target", "-16", "--out", "audio/vo"
     ], check=True)
-    cues, layers = [], [{"file": "audio/score.wav", "at": 0, "gain_db": -1, "bus": "music"}]
+    cues, layers = [], [{"file": "audio/score.wav", "at": 0, "gain_db": 4, "bus": "music"}]
+    # De-ess the third cue that the first pass identified as brighter than the rest.
+    subprocess.run([
+        sys.executable, "tools/voice_treat.py", "apply", paths[2],
+        "--medium", "clean", "--space", "dry", "--target", "-16",
+        "--extra", "equalizer=f=3400:t=q:w=0.9:g=-4,deesser=i=0.45",
+        "--out", "audio/vo"
+    ], check=True)
     for i, (line, start, limit) in enumerate(LINES, 1):
         wav = Path(f"audio/vo/line-{i}.wav")
         end = start + duration(wav)

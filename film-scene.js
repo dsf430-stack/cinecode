@@ -95,8 +95,21 @@ function splash(c,x,y,t){
 }
 function scene(c,n,t){
  c.drawImage(paper,0,0);
- sky(c);
- water(c,t);
+ c.save();
+ c.beginPath();c.rect(15,151,510,674);c.clip();
+ if(n===3){
+  c.save();c.translate(0,-280);c.scale(1,1.27);water(c,t);c.restore();
+ }else if(n===2){
+  wash(c,[[15,385],[138,363],[264,420],[525,401],[525,825],[15,825]],sand,.41);
+  for(let i=0;i<57;i++){
+   const y=398+i*7.9;
+   brush(c,15+rnd(0,13),y,510+rnd(0,15),y-24,12,sand,.14,-9);
+  }
+  for(let i=0;i<9;i++)brush(c,20+i*53,407,73+i*54,387,24,olive,.22,-12);
+ }else{
+  sky(c);
+  water(c,t);
+ }
  const progress=(t-bounds[n])/(bounds[n+1]-bounds[n]);
  if(n===0){
   craft(c,93-progress*11,432+progress*25,.26,t);
@@ -113,40 +126,46 @@ function scene(c,n,t){
    const phase=(t*1.2+i*.18)%1;
    brush(c,37+i*50-phase*14,785+phase*38,69+i*50,779+phase*38,3,'#e4ddc9',.56,-4);
   }
- }else{
+ }else if(n===1){
   shore(c);
-  obstacle(c,321,557,.7);obstacle(c,460,711,.9);obstacle(c,109,700,.55);
-  if(n===1){
-   craft(c,58,509,.72,t,ss(progress*3));
-   for(let i=0;i<3;i++){
-    const p=clamp(progress*1.4-i*.19);
-    if(p<=0)continue;
-    const x=91+220*p,y=546+139*p;
-    man(c,x,y,.63+.23*p,t+i*.6);
-    splash(c,x,y+82*(.63+.23*p),t+i*.2);
-   }
-  }else if(n===2){
-   craft(c,30,481,.56,t,1);
-   for(let i=0;i<3;i++){
-    const p=clamp(progress*1.15-i*.08);
-    const x=99+i*56+168*p,y=568+i*53+55*p;
-    man(c,x,y,.8+i*.11,t+i*.7);
-    splash(c,x,y+81*(.8+i*.11),t+i*.3);
-   }
-   for(let j=0;j<10;j++){
-    const a=clamp((progress-.16)*2.7);
-    brush(c,421+j*2,635,408+j*4,635-a*(28+j*3),13,'#7e8780',.09*(1-a),-8);
-   }
-  }else{
-   for(let i=0;i<5;i++)craft(c,49+i*96,380+i*32+progress*27,.29,t,1);
-   for(let i=0;i<12;i++){
-    const p=(progress*.45+i*.094)%1;
-    const x=45+i*35+20*p,y=492+i*17+92*p;
-    man(c,x,y,.38,t+i*.52);
-    splash(c,x,y+32,t+i*.17);
-   }
+  obstacle(c,429,648,.98);
+  c.save();c.translate(27,447);c.rotate(-.20);
+  craft(c,84,46,1.38,t,ss(progress*3));
+  c.restore();
+  for(let i=0;i<3;i++){
+   const p=clamp(progress*1.32-i*.15);
+   if(p<=0)continue;
+   const x=146+260*p,y=548+149*p+Math.sin(t*10+i)*5;
+   man(c,x,y,1.12+i*.12,t+i*.6);
+   splash(c,x,y+82*(1.12+i*.12),t+i*.2);
+  }
+ }else if(n===2){
+  for(let i=0;i<3;i++){
+   const p=clamp(progress*1.14-i*.09);
+   const x=-45+i*96+274*p,y=578+i*60+Math.sin(t*10+i)*8;
+   c.save();c.translate(x,y);c.rotate(-.13);
+   man(c,0,0,1.33+i*.2,t+i*.7);c.restore();
+   splash(c,x,y+105+i*14,t+i*.3);
+  }
+  obstacle(c,430,608,1.7);
+  const burst=clamp((progress-.16)*1.7);
+  for(let j=0;j<16;j++){
+   brush(c,388+j*3,577,371+j*6,577-burst*(43+j*5),19,'#7e8780',.13*(1-burst),-13);
+  }
+ }else{
+  c.save();c.translate(0,142);c.scale(1,.74);shore(c);c.restore();
+  for(let i=0;i<5;i++){
+   const x=45+i*108+progress*19,y=298+i*42+progress*110;
+   craft(c,x,y,.46,t,1);
+   splash(c,x,y+42,t+i*.17);
+  }
+  for(let i=0;i<12;i++){
+   const x=15+i*44+progress*41,y=504+i*16+progress*118+Math.sin(t*10+i)*4;
+   man(c,x,y,.55,t+i*.52);
+   splash(c,x,y+46,t+i*.17);
   }
  }
+ c.restore();
  for(let i=0;i<20;i++)brush(c,10,825+i*1.4,530,825+i*1.4,7,PAPER,.3,Math.sin(i)*5);
  lettering(c,n,t);
 }
